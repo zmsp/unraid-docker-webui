@@ -1,0 +1,14 @@
+image: alpine:latest
+pipelines:
+  branches:
+    main:
+      - step:
+          script:
+            - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+            #            - docker build -t olprog/test_docker_webui .
+            #            - docker push olprog/test_docker_webui:latest
+            - docker build -t olprog/unraid-docker-webui .
+            - docker push olprog/unraid-docker-webui:latest
+
+options:
+  docker: true
