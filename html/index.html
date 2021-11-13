@@ -335,14 +335,22 @@
         }
     })
 
-    document.getElementById('zoom').addEventListener('input', function (e) {
+    input.addEventListener('search', function () {
+        console.log("click")
+        const card = document.getElementsByClassName("card")
+        for (let c = 0; c < card.length; c++) {
+            card[c].style.display = ""
+        }
+    })
+
+    document.getElementById('zoom').addEventListener('input', function () {
         const percent = parseFloat(e.target.value);
         document.body.style.fontSize = (percent / 100) + 'rem'
         zoomValue.innerText = percent.toString()
         localStorage.setItem("size", percent.toString())
     })
 
-    document.querySelector('label.rotate').addEventListener('click', function (e) {
+    document.querySelector('label.rotate').addEventListener('click', function () {
         document.body.style.fontSize = '1rem'
         zoomValue.innerText = '100'
         localStorage.setItem("size", '100')
