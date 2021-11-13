@@ -343,7 +343,7 @@
         }
     })
 
-    document.getElementById('zoom').addEventListener('input', function () {
+    document.getElementById('zoom').addEventListener('input', function (e) {
         const percent = parseFloat(e.target.value);
         document.body.style.fontSize = (percent / 100) + 'rem'
         zoomValue.innerText = percent.toString()
