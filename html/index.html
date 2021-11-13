@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Docker Web UI</title>
+    <noscript>
+        For full functionality of this site it is necessary to enable JavaScript.
+        Here are the <a href="https://www.enable-javascript.com/">
+            instructions how to enable JavaScript in your web browser</a>.
+    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap"
+          rel="stylesheet">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            font-family: 'Poppins', sans-serif;
+            --primary: #1e252f;
+            --text: #eee5e9;
+
+            color: var(--text);
+        }
+
+        body {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            background-color: var(--primary);
+            min-height: 100vh;
+        }
+
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        section {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        {{if eq .IsRound "yes"}}
+        section::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: linear-gradient(#f00, #f0f);
+            clip-path: circle(25% at right 60%);
+        }
+
+        section::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: linear-gradient(#2785ce, #e91e63);
+            clip-path: circle(20% at 10% 10%);
+        }
+
+        {{end}}
+
+        #div-zoom {
+            position: fixed;
+            z-index: 9999;
+            top: 49%;
+            bottom: 49%;
+            left: -120px;
+            transform: rotateZ(-90deg);
+            font-size: 1.2rem;
+        }
+
+        #div-zoom .rotate {
+            position: absolute;
+            top: -8px;
+            right: -40px;
+            /*left: 500px;*/
+            transform: rotate(45deg);
+            cursor: pointer;
+        }
+
+        #div-zoom #zoom {
+            width: 300px;
+            -webkit-appearance: none; /* Override default CSS styles */
+            appearance: none;
+            height: 15px; /* Specified height */
+            background: #d3d3d3; /* Grey background */
+            outline: none; /* Remove outline */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+            color: #eee5e9;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px) saturate(180%);
+        }
+
+        #div-zoom #zoom:hover {
+            opacity: 1; /* Fully shown on mouse-over */
+        }
+
+        #div-zoom #zoom::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 25px; /* Set a specific slider handle width */
+            height: 25px; /* Slider handle height */
+            background: linear-gradient(#2785ce, #e91e63);
+            border-radius: 13px;
+            cursor: pointer; /* Cursor on hover */
+        }
+
+        #div-zoom #zoom::-moz-range-thumb {
+            width: 25px; /* Set a specific slider handle width */
+            height: 25px; /* Slider handle height */
+            background: linear-gradient(#2785ce, #e91e63);
+            border-radius: 13px;
+            cursor: pointer; /* Cursor on hover */
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            transform-origin: top left;
+        }
+
+        .container #filter {
+            width: 400px;
+            height: 50px;
+            font-size: 1.2em;
+            text-align: center;
+            color: #eee5e9;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px) saturate(180%);
+        }
+
+        .container #filter:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .container #filter::placeholder {
+            font-size: 1.3em;
+            color: rgba(238, 229, 233, 0.8);
+            text-align: center;
+        }
+
+        .container h3 {
+            width: 100%;
+        }
+
+        .container h5 {
+            width: 100%;
+            font-weight: 200;
+            margin-top: 5px;
+        }
+
+        .container .card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 20em;
+            height: 11.5em;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px) saturate(180%);
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .container hr {
+            width: 80%;
+            margin: 20px;
+        }
+
+        .container > .card .content {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            flex: 1 1 auto;
+            opacity: 0.6;
+            transition: opacity 300ms;
+            width: 100%;
+            height: 100%;
+        }
+
+        .container > .card.not-running .content {
+            opacity: 0.4;
+        }
+
+        .container > .card:not(.not-running):hover .content {
+            opacity: 1;
+        }
+
+        .container > .card .content div {
+            margin: 10px 0;
+        }
+
+        /*.container > .card .title h3 {*/
+        /*    font-size: 1.5em;*/
+        /*    font-weight: 700;*/
+        /*}*/
+
+        .container > .card .content .img {
+            position: relative;
+            width: calc((230 / 400) * 8em);
+            height: calc((230 / 400) * 8em);
+            border-radius: 50%;
+            overflow: hidden;
+            border: 10px solid rgba(0, 0, 0, 0.25);
+        }
+
+        .container > .card .img img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<section>
+    <div id="div-zoom">
+        <div class="rotate">
+            <label for="zoom" class="rotate">Zoom <span id="zoom-value"></span>%</label>
+        </div>
+        <input type="range" id="zoom" name="zoom"
+               min="50" max="150" value="100">
+    </div>
+    <div class="container" id="container">
+        <input type="search" name="filter" id="filter" placeholder="filter">
+        <label for="filter"></label>
+        {{if .Running}}
+            <h3>Docker App Running</h3>
+            <h5>Click on any card to access its webUI</h5>
+            {{ range $i, $docker := .Running}}
+                <div class="card">
+                    <a href="{{$docker.Webui}}" target="_blank">
+                        <div class="content">
+                            <div class="title">
+                                <h3>{{ $docker.Name }}</h3>
+                            </div>
+                            <div class="img">
+                                <img src="{{$docker.Icon}}" alt="">
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {{ end }}
+        {{ end }}
+        <hr>
+        {{if .NotRunning}}
+            <h3>Docker App Not Running</h3>
+            {{range $i, $docker := .NotRunning}}
+                <div class="card not-running">
+                    <div class="content">
+                        <div class="title">
+                            <h3>{{$docker.Name}}</h3>
+                        </div>
+                        <div class="img">
+                            <img src="{{$docker.Icon}}" alt="">
+                        </div>
+                    </div>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</section>
+
+<script>
+    const zoom = document.getElementById("zoom")
+    const localZoom = localStorage.getItem("size")
+    const zoomValue = document.getElementById("zoom-value")
+
+    document.body.addEventListener('load', function () {
+        console.log(this.style.fontSize);
+    })
+
+    if (localZoom == null) {
+        zoom.setAttribute("value", 100)
+        zoomValue.innerText = "100"
+    } else {
+        zoom.setAttribute("value", localZoom)
+        document.body.style.fontSize = (localZoom / 100) + 'rem'
+        zoomValue.innerText = localZoom
+    }
+
+    const input = document.getElementById("filter")
+    input.addEventListener('keyup', function () {
+        const card = document.getElementsByClassName("card")
+        const filter = input.value.toUpperCase()
+
+        for (let c = 0; c < card.length; c++) {
+            const title = card[c].querySelector(".title > h3")
+            const up = title.innerText.toUpperCase()
+            if (up.indexOf(filter) > -1) {
+                card[c].style.display = ""
+            } else {
+                card[c].style.display = "none"
+            }
+        }
+    })
+
+    document.getElementById('zoom').addEventListener('input', function (e) {
+        const percent = parseFloat(e.target.value);
+        document.body.style.fontSize = (percent / 100) + 'rem'
+        zoomValue.innerText = percent.toString()
+        localStorage.setItem("size", percent.toString())
+    })
+
+    document.querySelector('label.rotate').addEventListener('click', function (e) {
+        document.body.style.fontSize = '1rem'
+        zoomValue.innerText = '100'
+        localStorage.setItem("size", '100')
+        zoom.value = 100
+    })
+
+</script>
+</body>
+</html>
