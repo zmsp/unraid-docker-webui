@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -68,7 +69,7 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-	//data, err := ioutil.ReadFile("./config.json")
+	//data, err := ioutil.ReadFile("./docker.json")
 	data, err := ioutil.ReadFile("/data/docker.json")
 	if err != nil {
 		fmt.Print(err)
@@ -112,7 +113,18 @@ func getDocker() (running, notRunning []FinalModel) {
 					}
 				}
 			case "running":
-				run.Running = vv.(bool)
+				b, err := regexp.Compile(`(?i)^true$|^false$`)
+				if err != nil {
+					log.Println(err)
+					run.Running = false
+				} else {
+					if b.MatchString(fmt.Sprintf("%v", vv)) {
+						run.Running = vv.(bool)
+					} else {
+						run.Running = false
+					}
+					continue
+				}
 			case "shell":
 				if vv != nil {
 					run.Shell = vv.(string)
