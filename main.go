@@ -69,7 +69,7 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-	//data, err := ioutil.ReadFile("./docker.json")
+// 	data, err := ioutil.ReadFile("./docker.json")
 	data, err := ioutil.ReadFile("/data/docker.json")
 	if err != nil {
 		fmt.Print(err)

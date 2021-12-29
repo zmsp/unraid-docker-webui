@@ -172,6 +172,10 @@
             text-align: center;
         }
 
+        .container #filter:focus::placeholder {
+            opacity: 0.3;
+        }
+
         .container h3 {
             width: 100%;
         }
@@ -263,7 +267,7 @@
                min="50" max="150" value="100">
     </div>
     <div class="container" id="container">
-        <input type="search" name="filter" id="filter" placeholder="filter">
+        <input autofocus id="filter" name="filter" placeholder="filter" type="search">
         <label for="filter"></label>
         {{if .Running}}
             <h3>Docker App Running</h3>
