@@ -69,7 +69,7 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-// 	data, err := ioutil.ReadFile("./docker.json")
+	//data, err := ioutil.ReadFile("./docker.json")
 	data, err := ioutil.ReadFile("/data/docker.json")
 	if err != nil {
 		fmt.Print(err)
@@ -102,9 +102,15 @@ func getDocker() (running, notRunning []FinalModel) {
 				}
 				if uu.Host != "" {
 					u := strings.Split(uu.Host, ":")
-					if os.Getenv("HOST") != "" {
+					if os.Getenv("HOST") != "" && os.Getenv("UNRAID_IP") == "" {
 						uu.Host = os.Getenv("HOST")
 						if len(u) == 2 {
+							uu.Host = uu.Host + ":" + u[1]
+						}
+						run.Webui = uu.String()
+					} else if os.Getenv("HOST") != "" && os.Getenv("UNRAID_IP") != "" {
+						if u[0] == os.Getenv("UNRAID_IP") && len(u) == 2 {
+							uu.Host = os.Getenv("HOST")
 							uu.Host = uu.Host + ":" + u[1]
 						}
 						run.Webui = uu.String()
