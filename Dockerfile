@@ -23,10 +23,6 @@ WORKDIR /app
 
 ENV CIRCLE "no"
 
-ENV HOST "saminthedark.local"
-
-ENV UNRAID_IP 192.168.1.45
-
 EXPOSE 1111/tcp
 
 CMD ["./unraid-docker-webui"]
