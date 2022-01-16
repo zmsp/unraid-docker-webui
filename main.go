@@ -22,6 +22,7 @@ func init() {
 }
 
 type Page struct {
+	Title      string
 	Running    []FinalModel
 	NotRunning []FinalModel
 	IsRound    string
@@ -46,6 +47,13 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		running, notRunning := getDocker()
 		var page = Page{
+			Title: func() string {
+				if os.Getenv("TITLE") == "" {
+					return "Docker WebUI"
+				} else {
+					return os.Getenv("TITLE")
+				}
+			}(),
 			Running:    running,
 			NotRunning: notRunning,
 			IsRound:    os.Getenv("CIRCLE"),
