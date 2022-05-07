@@ -23,6 +23,8 @@ WORKDIR /app
 
 ENV CIRCLE "no"
 
+ENV PORT 80
+
 EXPOSE 1111/tcp
 
 CMD ["./unraid-docker-webui"]
