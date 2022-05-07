@@ -71,8 +71,15 @@ func main() {
 		}
 	})
 
-	log.Println("Started web to port 8080")
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	port := func() string {
+		if os.Getenv("PORT") == "" {
+			return ":8080"
+		} else {
+			return ":" + os.Getenv("PORT")
+		}
+	}
+	log.Println("Started web to port " + port())
+	log.Fatalln(http.ListenAndServe(port(), nil))
 }
 
 func getDocker() (running, notRunning []FinalModel) {
