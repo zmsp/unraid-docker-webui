@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -40,9 +39,14 @@ type FinalModel struct {
 //go:embed html
 var content embed.FS
 
+//go:embed static/favicon.ico
+var staticAssets embed.FS
+
 func main() {
 	fileServer := http.FileServer(http.Dir("/data/images"))
 	http.Handle("/images/", http.StripPrefix("/images", fileServer))
+
+	http.Handle("/static/", http.StripPrefix("/", http.FileServer(http.FS(staticAssets))))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		running, notRunning := getDocker()
@@ -64,6 +68,7 @@ func main() {
 			log.Println(err)
 			return
 		}
+
 		err = t.Execute(w, page)
 		if err != nil {
 			log.Println(err)

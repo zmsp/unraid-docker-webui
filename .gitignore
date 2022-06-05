@@ -116,5 +116,6 @@ modules.xml
 .idea/sonarlint
 
 # End of https://www.toptal.com/developers/gitignore/api/jetbrains+all,go
+docker.json
 /docker.json.sam
 /unraid-docker-webui
