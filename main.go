@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"regexp"
 	"sort"
@@ -85,25 +84,25 @@ func main() {
 		}
 	})
 
-	mux.HandleFunc("/docker-start", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			title := r.FormValue("title")
-			_, err := exec.Command("docker", "start", title).Output()
-			dockerStart := DockerStart{
-				UnraidIP: os.Getenv("UNRAID_IP"),
-			}
-			if err != nil {
-				log.Println(fmt.Sprintf("Problem : The '%s' container will not be started. %v", title, err))
-				dockerStart.Error = fmt.Sprintf("Problem : The '%s' container will not be started", title)
-				json.NewEncoder(w).Encode(dockerStart)
-				return
-			}
-
-			dockerStart.Message = fmt.Sprintf("The '%s' container will be started", title)
-			json.NewEncoder(w).Encode(dockerStart)
-			return
-		}
-	})
+	//mux.HandleFunc("/docker-start", func(w http.ResponseWriter, r *http.Request) {
+	//	if r.Method == http.MethodPost {
+	//		title := r.FormValue("title")
+	//		_, err := exec.Command("docker", "start", title).Output()
+	//		dockerStart := DockerStart{
+	//			UnraidIP: os.Getenv("UNRAID_IP"),
+	//		}
+	//		if err != nil {
+	//			log.Println(fmt.Sprintf("Problem : The '%s' container will not be started. %v", title, err))
+	//			dockerStart.Error = fmt.Sprintf("Problem : The '%s' container will not be started", title)
+	//			json.NewEncoder(w).Encode(dockerStart)
+	//			return
+	//		}
+	//
+	//		dockerStart.Message = fmt.Sprintf("The '%s' container will be started", title)
+	//		json.NewEncoder(w).Encode(dockerStart)
+	//		return
+	//	}
+	//})
 
 	port := func() string {
 		if os.Getenv("PORT") == "" {
