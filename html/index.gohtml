@@ -46,10 +46,30 @@
             height: 100%;
         }
 
+        div#message {
+            width: 100vw;
+            height: 50px;
+            background-color: transparent;
+            color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            transform: translateY(-50px);
+            font-size: 1.2em;
+            z-index: 9999;
+            transition: transform 300ms ease-in-out;
+        }
+
         section {
             position: relative;
             width: 100vw;
             height: 100vh;
+            transition: transform 300ms ease-in-out;
         }
 
         {{if eq .IsRound "yes"}}
@@ -226,6 +246,27 @@
             opacity: 0.4;
         }
 
+        .container > .card.not-running .play {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+        }
+
+        .container > .card.not-running:hover .play {
+            opacity: 1;
+            visibility: visible;
+            background-color: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
         .container > .card:not(.not-running):hover .content {
             opacity: 1;
         }
@@ -259,6 +300,7 @@
     </style>
 </head>
 <body>
+<div id="message">Test</div>
 <section>
     <div id="div-zoom">
         <div class="rotate">
@@ -301,8 +343,28 @@
                             <img src="{{$docker.Icon}}" alt="">
                         </div>
                     </div>
+                    <div class="play">
+                        <svg style="width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax">
+                            <polygon points="0,33 33,50 0,66" style="fill:rgba(255,255,255,0.7);"></polygon>
+                        </svg>
+                    </div>
                 </div>
             {{ end }}
+            <div class="card not-running">
+                <div class="content">
+                    <div class="title">
+                        <h3>mongodb</h3>
+                    </div>
+                    <div class="img">
+                        <img src="" alt="">
+                    </div>
+                </div>
+                <div class="play">
+                    <svg style="width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax">
+                        <polygon points="0,33 33,50 0,66" style="fill:rgba(255,255,255,0.7);"></polygon>
+                    </svg>
+                </div>
+            </div>
         {{ end }}
     </div>
 </section>
@@ -361,6 +423,56 @@
         zoomValue.innerText = '100'
         localStorage.setItem("size", '100')
         zoom.value = 100
+    })
+
+    document.querySelectorAll('.card.not-running .play').forEach(svg => {
+        svg.addEventListener('click', e => {
+            let h3 = ""
+            if (e.target.tagName === "svg") {
+                h3 = e.target.parentElement.parentElement.querySelector('.card.not-running .content .title h3')
+            } else if (e.target.tagName === "polygon") {
+                h3 = e.target.parentElement.parentElement.parentElement.querySelector('.card.not-running .content .title h3')
+            }
+            console.log('h3 : ', h3)
+            const title = h3.innerHTML
+
+            fetch('docker-start', {
+                method: "POST",
+                headers: new Headers({
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }),
+                body: `title=${title}`
+            }).then(resp => resp.json())
+                .then(json => {
+                    if (json.err === '' && json.message !== '') {
+                        const message = document.getElementById('message')
+                        const section = document.querySelector('section')
+                        message.innerHTML = json.message + "The page reloading to 5s !"
+                        message.style.transform = "translateY(0px)"
+                        message.style.backgroundColor = "#3A6670"
+                        message.style.color = "white"
+                        section.style.transform = "translateY(50px)"
+                        setTimeout(() => {
+                            location.reload()
+                        }, 5000)
+                    } else {
+                        const message = document.getElementById('message')
+                        const section = document.querySelector('section')
+                        message.innerHTML = json.err
+                        message.style.transform = "translateY(0px)"
+                        message.style.backgroundColor = "#E86C3E"
+                        message.style.color = "white"
+                        section.style.transform = "translateY(50px)"
+                        setTimeout(() => {
+                            message.style.transform = "translateY(-50px)"
+                            section.style.transform = "translateY(0px)"
+                        }, 5000)
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        })
     })
 
 </script>

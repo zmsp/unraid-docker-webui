@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"sort"
@@ -36,6 +37,11 @@ type FinalModel struct {
 	Shell   string
 }
 
+type DockerStart struct {
+	Message string `json:"message"`
+	Error   string `json:"err"`
+}
+
 //go:embed html
 var content embed.FS
 
@@ -43,12 +49,14 @@ var content embed.FS
 var staticAssets embed.FS
 
 func main() {
+
+	mux := http.NewServeMux()
 	fileServer := http.FileServer(http.Dir("/data/images"))
-	http.Handle("/images/", http.StripPrefix("/images", fileServer))
+	mux.Handle("/images/", http.StripPrefix("/images", fileServer))
 
-	http.Handle("/static/", http.StripPrefix("/", http.FileServer(http.FS(staticAssets))))
+	mux.Handle("/static/", http.StripPrefix("/", http.FileServer(http.FS(staticAssets))))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		running, notRunning := getDocker()
 		var page = Page{
 			Title: func() string {
@@ -63,7 +71,7 @@ func main() {
 			IsRound:    os.Getenv("CIRCLE"),
 		}
 
-		t, err := template.ParseFS(content, "html/index.html")
+		t, err := template.ParseFS(content, "html/index.gohtml")
 		if err != nil {
 			log.Println(err)
 			return
@@ -76,6 +84,24 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("/docker-start", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			title := r.FormValue("title")
+			_, err := exec.Command("docker", "start", title).Output()
+			dockerStart := DockerStart{}
+			if err != nil {
+				log.Println(fmt.Sprintf("Problem : The '%s' container will not be started. %v", title, err))
+				dockerStart.Error = fmt.Sprintf("Problem : The '%s' container will not be started", title)
+				json.NewEncoder(w).Encode(dockerStart)
+				return
+			}
+
+			dockerStart.Message = fmt.Sprintf("The '%s' container will be started", title)
+			json.NewEncoder(w).Encode(dockerStart)
+			return
+		}
+	})
+
 	port := func() string {
 		if os.Getenv("PORT") == "" {
 			return ":8080"
@@ -84,7 +110,7 @@ func main() {
 		}
 	}
 	log.Println("Started web to port " + port())
-	log.Fatalln(http.ListenAndServe(port(), nil))
+	log.Fatalln(http.ListenAndServe(port(), mux))
 }
 
 func getDocker() (running, notRunning []FinalModel) {
