@@ -38,8 +38,9 @@ type FinalModel struct {
 }
 
 type DockerStart struct {
-	Message string `json:"message"`
-	Error   string `json:"err"`
+	Message  string `json:"message"`
+	Error    string `json:"err"`
+	UnraidIP string `json:"unraid_ip"`
 }
 
 //go:embed html
@@ -88,7 +89,9 @@ func main() {
 		if r.Method == http.MethodPost {
 			title := r.FormValue("title")
 			_, err := exec.Command("docker", "start", title).Output()
-			dockerStart := DockerStart{}
+			dockerStart := DockerStart{
+				UnraidIP: os.Getenv("UNRAID_IP"),
+			}
 			if err != nil {
 				log.Println(fmt.Sprintf("Problem : The '%s' container will not be started. %v", title, err))
 				dockerStart.Error = fmt.Sprintf("Problem : The '%s' container will not be started", title)
@@ -115,8 +118,8 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-	//data, err := ioutil.ReadFile("./docker.json")
-	data, err := ioutil.ReadFile("/data/docker.json")
+	data, err := ioutil.ReadFile("./docker.json")
+	//data, err := ioutil.ReadFile("/data/docker.json")
 	if err != nil {
 		fmt.Print(err)
 	}

@@ -452,6 +452,11 @@
                         message.style.backgroundColor = "#3A6670"
                         message.style.color = "white"
                         section.style.transform = "translateY(50px)"
+                        setTimeout(()=>{
+                            fetch(json.unraid_ip).then(response => {
+                                console.log(response)
+                            })
+                        },1000)
                         setTimeout(() => {
                             location.reload()
                         }, 5000)
