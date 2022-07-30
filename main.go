@@ -36,16 +36,16 @@ type FinalModel struct {
 	Shell   string
 }
 
-type DockerStart struct {
-	Message  string `json:"message"`
-	Error    string `json:"err"`
-	UnraidIP string `json:"unraid_ip"`
-}
+//type DockerStart struct {
+//	Message  string `json:"message"`
+//	Error    string `json:"err"`
+//	UnraidIP string `json:"unraid_ip"`
+//}
 
 //go:embed html
 var content embed.FS
 
-//go:embed static/favicon.ico
+//go:embed static
 var staticAssets embed.FS
 
 func main() {
