@@ -121,4 +121,4 @@ docker.json
 /unraid-docker-webui
 /tmp
 /config
-.DS_STORE
+.DS_Store
