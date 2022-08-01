@@ -1,0 +1,4 @@
+containers:
+- name: Jellyfin
+  options:
+    sub_domain: https://jellyfin.saminthedark.fr

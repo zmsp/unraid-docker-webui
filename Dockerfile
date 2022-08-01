@@ -6,8 +6,6 @@ WORKDIR /app
 
 ADD . .
 
-RUN go get
-
 RUN go build
 
 FROM alpine:latest
@@ -18,10 +16,10 @@ RUN mkdir /app
 
 COPY --from=builder /app/unraid-docker-webui /app
 
-RUN mkdir /config
+RUN mkdir -p /data
 VOLUME ["/data"]
 
-RUN mkdir /config
+RUN mkdir -p /config
 VOLUME ["/config"]
 
 WORKDIR /app
