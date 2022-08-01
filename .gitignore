@@ -119,3 +119,6 @@ modules.xml
 docker.json
 /docker.json.sam
 /unraid-docker-webui
+/tmp
+/config
+.DS_Store
