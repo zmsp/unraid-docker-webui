@@ -6,6 +6,8 @@ WORKDIR /app
 
 ADD . .
 
+RUN go get
+
 RUN go build
 
 FROM alpine:latest
