@@ -209,20 +209,36 @@
         }
 
         .container .card {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 20em;
-            height: 11.5em;
+            width: 18em;
+            height: 12em;
             background: rgba(255, 255, 255, 0.06);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            margin: 20px;
+            margin: 18px;
             padding: 5px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px) saturate(180%);
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: 700;
+        }
+
+        .container .card.running .dns {
+            width: 100%;
+            position: relative;
+            bottom: 50px;
+        }
+
+        .container .card .dns input {
+            width: 100%;
+            height: 50px;
+            font-size: 0.8em;
+            background-color: rgba(255, 255, 255, 0.06);
+            color: inherit;
+            outline: none;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
         }
 
         .container hr {
@@ -236,15 +252,18 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            flex: 1 1 auto;
-            opacity: 0.6;
             transition: opacity 300ms;
             width: 100%;
-            height: 100%;
+        }
+
+        .container .card.running .content {
+            height: calc(100% - 50px);
+            opacity: 0.6;
         }
 
         .container > .card.not-running .content {
             opacity: 0.4;
+            height: 100%;
         }
 
         /*.container > .card.not-running .play {*/
@@ -268,7 +287,7 @@
         /*    cursor: pointer;*/
         /*}*/
 
-        .container > .card:not(.not-running):hover .content {
+        .container > .card.running:hover .content {
             opacity: 1;
         }
 
@@ -317,8 +336,8 @@
             <h3>Docker App Running</h3>
             <h5>Click on any card to access its webUI</h5>
             {{ range $i, $docker := .Running}}
-                <div class="card">
-                    <a href="{{$docker.Webui}}" target="_blank">
+                <div class="card running">
+                    <a href="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" target="_blank">
                         <div class="content">
                             <div class="title">
                                 <h3>{{ $docker.Name }}</h3>
@@ -328,6 +347,9 @@
                             </div>
                         </div>
                     </a>
+                    <div class="dns">
+                        <input type="text" value="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" id="input_dns" placeholder="subdomains">
+                    </div>
                 </div>
             {{ end }}
         {{ end }}
@@ -348,6 +370,9 @@
 {{/*                        <svg style="width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax">*/}}
 {{/*                            <polygon points="0,33 33,50 0,66" style="fill:rgba(255,255,255,0.7);"></polygon>*/}}
 {{/*                        </svg>*/}}
+{{/*                    </div>*/}}
+{{/*                    <div class="dns">*/}}
+{{/*                        <input type="text" value="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" id="input_dns" placeholder="subdomains">*/}}
 {{/*                    </div>*/}}
                 </div>
             {{ end }}
@@ -465,6 +490,29 @@
     //             })
     //     })
     // })
+
+    const runs = document.querySelectorAll(".card.running")
+    runs.forEach(r => {
+        const title = r.querySelector('.title h3').innerHTML;
+        r.querySelector('.dns').addEventListener('change', e => {
+            console.log(e.target.value, title)
+            const obj = {
+                title: title,
+                sub_domain: e.target.value
+            }
+            fetch("/update", {
+                method: 'POST',
+                body: JSON.stringify(obj)
+            }).then(resp => {
+                // console.log(resp.status)
+                if (resp.status === 201) {
+                    location.reload()
+                }
+            }).catch(err => {
+                console.log(err)
+            })
+        })
+    })
 
     if('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

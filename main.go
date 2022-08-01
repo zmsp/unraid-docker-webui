@@ -29,11 +29,12 @@ type Page struct {
 }
 
 type FinalModel struct {
-	Name    string
-	Icon    string
-	Webui   string
-	Running bool
-	Shell   string
+	Name      string `json:"name"`
+	Icon      string `json:"icon"`
+	Webui     string `json:"webui"`
+	Running   bool   `json:"running"`
+	Shell     string `json:"shell"`
+	SubDomain string `json:"sub_domain"`
 }
 
 //type DockerStart struct {
@@ -48,7 +49,16 @@ var content embed.FS
 //go:embed static
 var staticAssets embed.FS
 
+var pathFile = "data/subdomains.yml"
+
 func main() {
+
+	file, err := os.OpenFile(pathFile, os.O_CREATE|os.O_APPEND, 0644)
+	defer file.Close()
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	mux := http.NewServeMux()
 	fileServer := http.FileServer(http.Dir("/data/images"))
@@ -84,6 +94,40 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				log.Println(err)
+				return
+			}
+			type respBody struct {
+				Title     string `json:"title"`
+				SubDomain string `json:"sub_domain"`
+			}
+			var resp = &respBody{}
+			err = json.Unmarshal(body, &resp)
+			if err != nil {
+				http.Error(w, "", http.StatusInternalServerError)
+				log.Println(err)
+				return
+			}
+
+			var docker = &Docker{}
+			var container = &Container{
+				Name: resp.Title,
+				Options: &Options{
+					SubDomain: resp.SubDomain,
+				},
+			}
+
+			docker.update(container)
+			w.WriteHeader(http.StatusCreated)
+			return
+		}
+	})
+
 	//mux.HandleFunc("/docker-start", func(w http.ResponseWriter, r *http.Request) {
 	//	if r.Method == http.MethodPost {
 	//		title := r.FormValue("title")
@@ -106,7 +150,7 @@ func main() {
 
 	port := func() string {
 		if os.Getenv("PORT") == "" {
-			return ":8080"
+			return "localhost:8080"
 		} else {
 			return ":" + os.Getenv("PORT")
 		}
@@ -118,7 +162,13 @@ func main() {
 func getDocker() (running, notRunning []FinalModel) {
 
 	//data, err := ioutil.ReadFile("./docker.json")
-	data, err := ioutil.ReadFile("/data/docker.json")
+	var pathDocker string
+	if os.Getenv("DOCKER_PATH") == "" {
+		pathDocker = "/data/docker.json"
+	} else {
+		pathDocker = os.Getenv("DOCKER_PATH")
+	}
+	data, err := ioutil.ReadFile(pathDocker)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -204,8 +254,25 @@ func getDocker() (running, notRunning []FinalModel) {
 	sort.Slice(notRunning, func(i, j int) bool {
 		return strings.ToLower(notRunning[i].Name) < strings.ToLower(notRunning[j].Name)
 	})
-	log.Printf("App Runing : %v\n", running)
-	log.Printf("App Not running: %v\n", notRunning)
+
+	var docker = &Docker{}
+	docker.read()
+
+	for _, c := range docker.Containers {
+		for i, r := range running {
+			if c.Name == r.Name {
+				running[i].SubDomain = c.Options.SubDomain
+			}
+		}
+		for i, n := range notRunning {
+			if c.Name == n.Name {
+				notRunning[i].SubDomain = c.Options.SubDomain
+			}
+		}
+	}
+
+	//log.Printf("App Runing : %v\n", running)
+	//log.Printf("App Not running: %v\n", notRunning)
 	return running, notRunning
 }
 
