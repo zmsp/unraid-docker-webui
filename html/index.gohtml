@@ -24,7 +24,7 @@
             font-family: 'Poppins', sans-serif;
             --primary: #1e252f;
             --text: #eee5e9;
-
+            --radius: 12px;
             color: var(--text);
         }
 
@@ -44,7 +44,6 @@
             text-decoration: none;
             display: block;
             width: 100%;
-            height: 100%;
         }
 
         /*div#message {*/
@@ -129,7 +128,7 @@
             color: #eee5e9;
             background: rgba(255, 255, 255, 0.06);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
+            border-radius: var(--radius);
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px) saturate(180%);
         }
@@ -177,7 +176,7 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             margin: 20px;
             padding: 5px;
-            border-radius: 12px;
+            border-radius: var(--radius);
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px) saturate(180%);
         }
@@ -215,30 +214,11 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             margin: 18px;
             padding: 5px;
-            border-radius: 12px;
+            border-radius: var(--radius);
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px) saturate(180%);
             font-size: 1.3em;
             font-weight: 700;
-        }
-
-        .container .card.running .dns {
-            width: 100%;
-            position: relative;
-            bottom: 50px;
-        }
-
-        .container .card .dns input {
-            width: 100%;
-            height: 50px;
-            font-size: 0.8em;
-            background-color: rgba(255, 255, 255, 0.06);
-            color: inherit;
-            outline: none;
-            text-align: center;
-            padding: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
         }
 
         .container hr {
@@ -257,8 +237,8 @@
         }
 
         .container .card.running .content {
-            height: calc(100% - 50px);
-            opacity: 0.6;
+            height: calc(100% - 2.4em);
+            opacity: 0.9;
         }
 
         .container > .card.not-running .content {
@@ -317,6 +297,68 @@
             height: 100%;
             object-fit: cover;
         }
+
+        .container .card.running .dns {
+            width: 100%;
+            position: relative;
+        }
+
+        .container .card .dns input {
+            width: 100%;
+            height: 3em;
+            font-size: 0.8em;
+            background-color: rgba(255, 255, 255, 0.06);
+            color: inherit;
+            outline: none;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+        }
+
+        .container > .card .link {
+            position: absolute;
+            z-index: 9999;
+            top: 0;
+            bottom: 3em;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            visibility: hidden;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: var(--radius);
+            transition: opacity 200ms ease-in-out, visibility 200ms ease-in-out;
+        }
+
+        .container > .card:hover .link {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .container > .card .link a {
+            /*border: 1px solid red;*/
+            height: calc(100% / 2);
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.2em;
+            transition: background-color 200ms ease-in-out;
+        }
+
+        .container > .card .link a:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .container > .card .link a:first-child {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .container > .card .link a:last-child {
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+
     </style>
 </head>
 <body>
@@ -337,18 +379,28 @@
             <h5>Click on any card to access its webUI</h5>
             {{ range $i, $docker := .Running}}
                 <div class="card running">
-                    <a href="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" target="_blank">
-                        <div class="content">
-                            <div class="title">
-                                <h3>{{ $docker.Name }}</h3>
-                            </div>
-                            <div class="img">
-                                <img src="{{$docker.Icon}}" alt="">
-                            </div>
+                    <div class="content">
+                        <div class="title">
+                            <h3>{{ $docker.Name }}</h3>
                         </div>
-                    </a>
+                        <div class="img">
+                            <img src="{{$docker.Icon}}" alt="">
+                        </div>
+                    </div>
                     <div class="dns">
-                        <input type="text" value="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" id="input_dns" placeholder="subdomains">
+                        <input type="text"
+                               value="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
+                               id="input_dns" placeholder="subdomains">
+                    </div>
+                    <div class="link">
+                        <a href="{{$docker.WebuiLan}}"
+                           target="_blank">
+                            LAN
+                        </a>
+                        <a href="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
+                           target="_blank">
+                            WAN
+                        </a>
                     </div>
                 </div>
             {{ end }}
@@ -366,14 +418,14 @@
                             <img src="{{$docker.Icon}}" alt="">
                         </div>
                     </div>
-{{/*                    <div class="play">*/}}
-{{/*                        <svg style="width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax">*/}}
-{{/*                            <polygon points="0,33 33,50 0,66" style="fill:rgba(255,255,255,0.7);"></polygon>*/}}
-{{/*                        </svg>*/}}
-{{/*                    </div>*/}}
-{{/*                    <div class="dns">*/}}
-{{/*                        <input type="text" value="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" id="input_dns" placeholder="subdomains">*/}}
-{{/*                    </div>*/}}
+                    {{/*                    <div class="play">*/}}
+                    {{/*                        <svg style="width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax">*/}}
+                    {{/*                            <polygon points="0,33 33,50 0,66" style="fill:rgba(255,255,255,0.7);"></polygon>*/}}
+                    {{/*                        </svg>*/}}
+                    {{/*                    </div>*/}}
+                    {{/*                    <div class="dns">*/}}
+                    {{/*                        <input type="text" value="{{if eq $docker.SubDomain  ""}}{{$docker.Webui}}{{else}}{{$docker.SubDomain}}{{end}}" id="input_dns" placeholder="subdomains">*/}}
+                    {{/*                    </div>*/}}
                 </div>
             {{ end }}
         {{ end }}
@@ -514,7 +566,7 @@
         })
     })
 
-    if('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/static/sw.js')
                 .then((registration) => {

@@ -29,12 +29,13 @@ type Page struct {
 }
 
 type FinalModel struct {
-	Name      string `json:"name"`
-	Icon      string `json:"icon"`
-	Webui     string `json:"webui"`
-	Running   bool   `json:"running"`
-	Shell     string `json:"shell"`
-	SubDomain string `json:"sub_domain"`
+	Name      string
+	Icon      string
+	WebuiLan  string
+	WebuiWan  string
+	Running   bool
+	Shell     string
+	SubDomain string
 }
 
 //type DockerStart struct {
@@ -49,9 +50,13 @@ var content embed.FS
 //go:embed static
 var staticAssets embed.FS
 
-var pathFile = "/config/subdomains.yml"
+var pathFile = "config/subdomains.yml"
 
 func main() {
+
+	if os.Getenv("DOCKER_PATH") == "" {
+		pathFile = "/" + pathFile
+	}
 
 	file, err := os.OpenFile(pathFile, os.O_CREATE|os.O_APPEND, 0644)
 	defer file.Close()
@@ -161,10 +166,10 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-	//data, err := ioutil.ReadFile("./docker.json")
+	//config, err := ioutil.ReadFile("./docker.json")
 	var pathDocker string
 	if os.Getenv("DOCKER_PATH") == "" {
-		pathDocker = "/data/docker.json"
+		pathDocker = "/config/docker.json"
 	} else {
 		pathDocker = os.Getenv("DOCKER_PATH")
 	}
@@ -195,25 +200,27 @@ func getDocker() (running, notRunning []FinalModel) {
 				run.Icon = path.Clean("/images/" + path.Base(checkIfNotNullAndReturnString(vv)))
 			case "url":
 				uu, err := url.Parse(checkIfNotNullAndReturnString(vv))
+
 				if err != nil {
 					log.Println(err)
 				}
 				if uu.Host != "" {
 					u := strings.Split(uu.Host, ":")
-					if os.Getenv("HOST") != "" && os.Getenv("UNRAID_IP") == "" {
+					run.WebuiLan = uu.Scheme + "://" + uu.Host
+					if os.Getenv("HOST") != "" {
 						uu.Host = os.Getenv("HOST")
 						if len(u) == 2 {
 							uu.Host = uu.Host + ":" + u[1]
 						}
-						run.Webui = uu.String()
-					} else if os.Getenv("HOST") != "" && os.Getenv("UNRAID_IP") != "" {
-						if u[0] == os.Getenv("UNRAID_IP") && len(u) == 2 {
-							uu.Host = os.Getenv("HOST")
-							uu.Host = uu.Host + ":" + u[1]
-						}
-						run.Webui = uu.String()
+						run.WebuiWan = uu.String()
+						//} else if os.Getenv("HOST") != "" && os.Getenv("UNRAID_IP") != "" {
+						//	if u[0] == os.Getenv("UNRAID_IP") && len(u) == 2 {
+						//		uu.Host = os.Getenv("HOST")
+						//		uu.Host = uu.Host + ":" + u[1]
+						//	}
+						//	run.WebuiLan = uu.String()
 					} else {
-						run.Webui = checkIfNotNullAndReturnString(vv)
+						run.WebuiLan = checkIfNotNullAndReturnString(vv)
 					}
 				}
 			case "running":
@@ -240,7 +247,7 @@ func getDocker() (running, notRunning []FinalModel) {
 		}
 		// Update for version 6.10-rc2 or newer => os.Getenv("HOST_CONTAINERNAME")
 
-		if run.Webui != "" && run.Name != checkName {
+		if (run.WebuiLan != "" || run.WebuiWan != "") && run.Name != checkName {
 			if run.Running {
 				running = append(running, run)
 			} else {
@@ -271,8 +278,8 @@ func getDocker() (running, notRunning []FinalModel) {
 		}
 	}
 
-	//log.Printf("App Runing : %v\n", running)
-	//log.Printf("App Not running: %v\n", notRunning)
+	log.Printf("App Runing : %+v\n", running)
+	log.Printf("App Not running: %+v\n", notRunning)
 	return running, notRunning
 }
 

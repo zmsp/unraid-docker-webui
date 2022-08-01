@@ -16,7 +16,7 @@ RUN mkdir /app
 
 COPY --from=builder /app/unraid-docker-webui /app
 
-RUN mkdir /data
+RUN mkdir /config
 VOLUME ["/data"]
 
 RUN mkdir /config
