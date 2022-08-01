@@ -49,7 +49,7 @@ var content embed.FS
 //go:embed static
 var staticAssets embed.FS
 
-var pathFile = "data/subdomains.yml"
+var pathFile = "/config/subdomains.yml"
 
 func main() {
 

@@ -19,6 +19,9 @@ COPY --from=builder /app/unraid-docker-webui /app
 RUN mkdir /data
 VOLUME ["/data"]
 
+RUN mkdir /config
+VOLUME ["/config"]
+
 WORKDIR /app
 
 ENV CIRCLE "no"
