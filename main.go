@@ -169,7 +169,7 @@ func getDocker() (running, notRunning []FinalModel) {
 	//config, err := ioutil.ReadFile("./docker.json")
 	var pathDocker string
 	if os.Getenv("DOCKER_PATH") == "" {
-		pathDocker = "/config/docker.json"
+		pathDocker = "/data/docker.json"
 	} else {
 		pathDocker = os.Getenv("DOCKER_PATH")
 	}
