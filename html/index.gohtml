@@ -238,8 +238,12 @@
         }
 
         .container .card.running .content {
-            height: calc(100% - 2.4em);
-            opacity: 0.9;
+            height: {{if .Wan}} calc(100% - 2.4em) {{else}} 100%{{end}};
+            opacity: 0.8;
+        }
+
+        .container .card.running > a {
+            height: 100%;
         }
 
         .container > .card.not-running .content {
