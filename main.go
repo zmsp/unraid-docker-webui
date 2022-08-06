@@ -26,6 +26,7 @@ type Page struct {
 	NotRunning []FinalModel
 	IsRound    string
 	Hostname   string
+	Wan        bool
 }
 
 type FinalModel struct {
@@ -52,11 +53,20 @@ var staticAssets embed.FS
 
 var pathFile = "config/subdomains.yml"
 
+var WAN = false
+
 func main() {
 
 	if os.Getenv("DOCKER_PATH") == "" {
 		pathFile = "/" + pathFile
 	}
+	if strings.ToLower(os.Getenv("WAN")) == "true" {
+		WAN = true
+	} else {
+		WAN = false
+	}
+
+	//WAN = true
 
 	file, err := os.OpenFile(pathFile, os.O_CREATE|os.O_APPEND, 0644)
 	defer file.Close()
@@ -84,6 +94,7 @@ func main() {
 			Running:    running,
 			NotRunning: notRunning,
 			IsRound:    os.Getenv("CIRCLE"),
+			Wan:        WAN,
 		}
 
 		t, err := template.ParseFS(content, "html/index.gohtml")
