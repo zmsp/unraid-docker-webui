@@ -12,7 +12,7 @@ tmp_dir = "tmp"
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   follow_symlink = false
-full_bin = "HOST=saminthedark.duckdns.org UNRAID_IP=192.168.1.45 DOCKER_PATH=docker.json WAN=false go run ."
+full_bin = "HOST=saminthedark.duckdns.org UNRAID_IP=192.168.1.45 DOCKER_PATH=docker.json go run ."
 include_dir = []
   include_ext = ["go", "tpl", "tmpl", "html", "gohtml", "json"]
   kill_delay = "0s"

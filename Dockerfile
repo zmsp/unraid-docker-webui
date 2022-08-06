@@ -25,7 +25,6 @@ VOLUME ["/config"]
 WORKDIR /app
 
 ENV CIRCLE "no"
-ENV WAN false
 
 ENV PORT 80
 
