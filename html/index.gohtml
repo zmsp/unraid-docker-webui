@@ -238,9 +238,8 @@
         }
 
         .container .card.running .content {
-        {{if .Wan}} height: calc(100% - 2.4em);
-        {{else}} height: 100%;
-        {{end}} opacity: 0.8;
+            height: {{if .Wan}} calc(100% - 2.4em) {{else}} 100%{{end}};
+            opacity: 0.8;
         }
 
         .container .card.running > a {
@@ -383,46 +382,31 @@
         {{if .Running}}
             <h3>Docker App Running</h3>
             <h5>Click on any card to access its webUI</h5>
-            {{ $wan := .Wan}}
             {{ range $i, $docker := .Running}}
                 <div class="card running">
-                    {{if $wan }}
-                        <div class="content">
-                            <div class="title">
-                                <h3>{{ $docker.Name }}</h3>
-                            </div>
-                            <div class="img">
-                                <img src="{{$docker.Icon}}" alt="">
-                            </div>
+                    <div class="content">
+                        <div class="title">
+                            <h3>{{ $docker.Name }}</h3>
                         </div>
-
-                        <div class="dns">
-                            <input type="text"
-                                   value="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
-                                   id="input_dns" placeholder="subdomains">
+                        <div class="img">
+                            <img src="{{$docker.Icon}}" alt="">
                         </div>
-                        <div class="link">
-                            <a href="{{$docker.WebuiLan}}"
-                               target="_blank">
-                                LAN
-                            </a>
-                            <a href="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
-                               target="_blank">
-                                WAN
-                            </a>
-                        </div>
-                    {{ else }}
-                        <a href="{{$docker.WebuiLan}}" target="_blank">
-                            <div class="content">
-                                <div class="title">
-                                    <h3>{{ $docker.Name }}</h3>
-                                </div>
-                                <div class="img">
-                                    <img src="{{$docker.Icon}}" alt="">
-                                </div>
-                            </div>
+                    </div>
+                    <div class="dns">
+                        <input type="text"
+                               value="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
+                               id="input_dns" placeholder="subdomains">
+                    </div>
+                    <div class="link">
+                        <a href="{{$docker.WebuiLan}}"
+                           target="_blank">
+                            LAN
                         </a>
-                    {{ end }}
+                        <a href="{{if eq $docker.SubDomain  ""}}{{$docker.WebuiWan}}{{else}}{{$docker.SubDomain}}{{end}}"
+                           target="_blank">
+                            WAN
+                        </a>
+                    </div>
                 </div>
             {{ end }}
         {{ end }}
@@ -563,7 +547,7 @@
     //             })
     //     })
     // })
-    {{ if .Wan}}
+
     const runs = document.querySelectorAll(".card.running")
     runs.forEach(r => {
         const title = r.querySelector('.title h3').innerHTML;
@@ -586,7 +570,7 @@
             })
         })
     })
-    {{ end }}
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/static/sw.js')
