@@ -60,10 +60,10 @@ func main() {
 	if os.Getenv("DOCKER_PATH") == "" {
 		pathFile = "/" + pathFile
 	}
-	if strings.ToLower(os.Getenv("WAN")) == "true" {
-		WAN = true
-	} else {
+	if strings.ToLower(strings.TrimSpace(os.Getenv("HOST"))) == "" {
 		WAN = false
+	} else {
+		WAN = true
 	}
 
 	//WAN = true
