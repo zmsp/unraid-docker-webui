@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap"
           rel="stylesheet">
-    <link rel="manifest" href="/static/manifest.json" crossorigin="use-credentials"/>
+    <link rel="manifest" href="../static/manifest.json" crossorigin="use-credentials"/>
     <style>
         * {
             padding: 0;
@@ -588,7 +588,7 @@
     {{ end }}
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/static/sw.js')
+            navigator.serviceWorker.register('/sw.js')
                 .then((registration) => {
                     console.log(`service worker registered succesfully`)
                     console.log(registration)

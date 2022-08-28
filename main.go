@@ -81,6 +81,26 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/", http.FileServer(http.FS(staticAssets))))
 
+	mux.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {
+		data, err := staticAssets.ReadFile("static/sw.js")
+		if err != nil {
+			http.Error(w, "Couldn't read file", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+		w.Write(data)
+	})
+
+	mux.HandleFunc("/manifest.json", func(w http.ResponseWriter, r *http.Request) {
+		data, err := staticAssets.ReadFile("static/manifest.json")
+		if err != nil {
+			http.Error(w, "Couldn't read file", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Write(data)
+	})
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		running, notRunning := getDocker()
 		var page = Page{
