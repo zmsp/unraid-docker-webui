@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/goccy/go-yaml"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Docker struct {
@@ -26,15 +26,14 @@ func (d *Docker) write() {
 		log.Println(err)
 	}
 
-	err = ioutil.WriteFile(pathFile, y, 0644)
+	err = os.WriteFile(pathFile, y, 0644)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (d *Docker) read() *Docker {
-
-	b, err := ioutil.ReadFile(pathFile)
+	b, err := os.ReadFile(pathFile)
 	if err != nil {
 		log.Println(err)
 	}

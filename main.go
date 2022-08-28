@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -69,7 +69,12 @@ func main() {
 	//WAN = true
 
 	file, err := os.OpenFile(pathFile, os.O_CREATE|os.O_APPEND, 0644)
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(file)
 
 	if err != nil {
 		log.Println(err)
@@ -82,13 +87,16 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/", http.FileServer(http.FS(staticAssets))))
 
 	mux.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {
-		data, err := staticAssets.ReadFile("static/sw.js")
+		data, err := staticAssets.ReadFile("/static/sw.js")
 		if err != nil {
 			http.Error(w, "Couldn't read file", http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
-		w.Write(data)
+		_, err = w.Write(data)
+		if err != nil {
+			return
+		}
 	})
 
 	mux.HandleFunc("/manifest.json", func(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +106,10 @@ func main() {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.Write(data)
+		_, err = w.Write(data)
+		if err != nil {
+			return
+		}
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +143,7 @@ func main() {
 
 	mux.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "", http.StatusInternalServerError)
 				log.Println(err)
@@ -197,14 +208,14 @@ func main() {
 
 func getDocker() (running, notRunning []FinalModel) {
 
-	//config, err := ioutil.ReadFile("./docker.json")
+	//config, err := os.ReadFile("./docker.json")
 	var pathDocker string
 	if os.Getenv("DOCKER_PATH") == "" {
 		pathDocker = "/data/docker.json"
 	} else {
 		pathDocker = os.Getenv("DOCKER_PATH")
 	}
-	data, err := ioutil.ReadFile(pathDocker)
+	data, err := os.ReadFile(pathDocker)
 	if err != nil {
 		fmt.Print(err)
 	}

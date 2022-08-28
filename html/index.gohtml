@@ -272,7 +272,8 @@
         /*    cursor: pointer;*/
         /*}*/
 
-        .container > .card.running:hover .content {
+        .container > .card.running:hover .content,
+        .container > .card.running:active .content {
             opacity: 1;
         }
 
@@ -335,7 +336,8 @@
             transition: opacity 200ms ease-in-out, visibility 200ms ease-in-out;
         }
 
-        .container > .card:hover .link {
+        .container > .card:hover .link,
+        .container > .card:active .link {
             opacity: 1;
             visibility: visible;
         }
@@ -351,7 +353,8 @@
             transition: background-color 200ms ease-in-out;
         }
 
-        .container > .card .link a:hover {
+        .container > .card .link a:hover,
+        .container > .card .link a:active {
             background-color: rgba(255, 255, 255, 0.5);
         }
 
