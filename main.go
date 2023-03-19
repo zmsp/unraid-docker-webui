@@ -30,12 +30,12 @@ type Page struct {
 }
 
 type FinalModel struct {
-	Name      string
-	Icon      string
-	WebuiLan  string
-	WebuiWan  string
-	Running   bool
-	Shell     string
+	Name     string
+	Icon     string
+	WebuiLan string
+	WebuiWan string
+	Running  bool
+	//Shell     bool
 	SubDomain string
 }
 
@@ -278,13 +278,13 @@ func getDocker() (running, notRunning []FinalModel) {
 					}
 					continue
 				}
-			case "shell":
-				if vv != nil {
-					run.Shell = vv.(string)
-				} else {
-					run.Shell = "sh"
-				}
-
+				//case "shell":
+				//	if vv != nil {
+				//		run.Shell = vv.(bool)
+				//	} else {
+				//		run.Shell = false
+				//	}
+				//
 			}
 		}
 		// Update for version 6.10-rc2 or newer => os.Getenv("HOST_CONTAINERNAME")
