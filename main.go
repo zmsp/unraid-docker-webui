@@ -237,10 +237,18 @@ func getDocker() (running, notRunning []FinalModel) {
 		var run FinalModel
 		for s, vv := range model {
 			run.Name = k
+			log.Println(s, k)
 			switch s {
+			case "":
+				break
 			case "icon":
 				run.Icon = path.Clean("/images/" + path.Base(checkIfNotNullAndReturnString(vv)))
 			case "url":
+				urll := checkIfNotNullAndReturnString(vv)
+				if urll == "" {
+					break
+				}
+				log.Println(vv)
 				uu, err := url.Parse(checkIfNotNullAndReturnString(vv))
 
 				if err != nil {
@@ -325,10 +333,14 @@ func getDocker() (running, notRunning []FinalModel) {
 	return running, notRunning
 }
 
-func checkIfNotNullAndReturnString(vv interface{}) string {
+func checkIfNotNullAndReturnString(vv any) string {
 	if vv != nil {
-		s := vv.(string)
-		return strings.Replace(s, "&amp;", "&", -1)
+		switch vv.(type) {
+		case string:
+			s := vv.(string)
+			return strings.Replace(s, "&amp;", "&", -1)
+		}
 	}
+
 	return ""
 }

@@ -1,6 +1,6 @@
 module unraid-docker-webui
 
-go 1.17
+go 1.20
 
 require github.com/goccy/go-yaml v1.9.5
 
