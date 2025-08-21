@@ -10,7 +10,7 @@ RUN go build
 
 FROM alpine:latest
 
-MAINTAINER "Samuel MICHAUX <samuel.michaux@gmail.com>"
+MAINTAINER "Zobair <zprimellc@gmail.com>"
 
 RUN mkdir /app
 
@@ -28,6 +28,6 @@ ENV CIRCLE "no"
 
 ENV PORT 80
 
-EXPOSE 1111/tcp
+EXPOSE 8097/tcp
 
 CMD ["./unraid-docker-webui"]
