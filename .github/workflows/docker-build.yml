@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: alpine:latest
 
     steps:
       - name: Checkout code
@@ -21,16 +21,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image to GHCR (main)
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         if: github.ref == 'refs/heads/main'
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}:latest
-          docker build -t $IMAGE .
-          docker push $IMAGE
-
-      - name: Build and push Docker image to GHCR (develop)
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}:develop
-          docker build -t $IMAGE .
-          docker push $IMAGE
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/unraid-docker-webui:latest
